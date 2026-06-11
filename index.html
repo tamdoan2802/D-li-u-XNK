@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Xuất Nhập Khẩu Việt Nam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
+<style>
+:root{
+  --bg:#040c18;--bg2:#06101f;--bg3:#0b1929;--panel:#0d1e33;
+  --border:#162d47;--border2:#1c3a56;
+  --xk:#00d4aa;--xk2:#00ffcc;--xk-a:rgba(0,212,170,0.13);--xk-glow:rgba(0,212,170,0.3);
+  --nk:#ff7b35;--nk2:#ffaa66;--nk-a:rgba(255,123,53,0.13);--nk-glow:rgba(255,123,53,0.3);
+  --c2:#4da6ff;--c3:#c084fc;--yellow:#ffd700;
+  --text:#deeeff;--text2:#6a98bb;--text3:#3a6585;
+  --up:#22c55e;--down:#ef4444;--neu:#fbbf24;
+
+  /* Year palette – 7 distinct colors */
+  --y2020:#60a5fa;--y2021:#34d399;--y2022:#fbbf24;
+  --y2023:#f87171;--y2024:#a78bfa;--y2025:#38bdf8;--y2026:#fb923c;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,170,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.022) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;}
+
+/* HEADER */
+header{padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(4,12,24,.97);backdrop-filter:blur(16px);position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--xk),#0099cc);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:#000;}
+.logo-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:2px;text-transform:uppercase;}
+.logo-text span{color:var(--xk);}
+.hdr-right{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text3);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--xk);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* TABS */
+.tabs-bar{padding:0 28px;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
+.tab-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;padding:13px 26px;background:none;border:none;color:var(--text3);cursor:pointer;position:relative;transition:color .2s;display:flex;align-items:center;gap:7px;}
+.tab-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;transform:scaleX(0);transition:transform .3s;border-radius:2px 2px 0 0;}
+.tab-btn.xk::after{background:var(--xk);}
+.tab-btn.nk::after{background:var(--nk);}
+.tab-btn.xk.active{color:var(--xk);}
+.tab-btn.nk.active{color:var(--nk);}
+.tab-btn.active::after{transform:scaleX(1);}
+
+/* MAIN */
+main{padding:20px 28px 52px;}
+
+/* CONTROLS */
+.controls{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:18px;display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;}
+.ctrl-group{flex:1;min-width:200px;}
+.ctrl-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:9px;}
+.time-disp{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
+.t-badge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:var(--text);}
+.t-sep{color:var(--text3);font-size:12px;}
+
+/* Sliders */
+.noUi-connect{background:var(--xk)!important;}
+.noUi-target{background:var(--border2)!important;border:none!important;box-shadow:none!important;}
+.noUi-handle{background:var(--xk)!important;border:2px solid var(--bg)!important;border-radius:50%!important;box-shadow:0 0 8px var(--xk-glow)!important;width:15px!important;height:15px!important;top:-5.5px!important;right:-7.5px!important;}
+.noUi-handle::before,.noUi-handle::after{display:none!important;}
+.nk-slider .noUi-connect{background:var(--nk)!important;}
+.nk-slider .noUi-handle{background:var(--nk)!important;box-shadow:0 0 8px var(--nk-glow)!important;}
+
+/* Chips */
+.filter-wrap{flex:2;min-width:300px;}
+.search-box{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 11px;margin-bottom:8px;}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;width:100%;}
+.search-box input::placeholder{color:var(--text3);}
+.chip-acts{display:flex;gap:8px;margin-bottom:7px;}
+.chip-act{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:'Barlow',sans-serif;text-decoration:underline;padding:0;}
+.chip-act:hover{color:var(--text2);}
+.chips{display:flex;flex-wrap:wrap;gap:5px;max-height:108px;overflow-y:auto;padding:2px;}
+.chips::-webkit-scrollbar{width:3px;}
+.chips::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.chip{font-size:11.5px;padding:3px 9px;border-radius:20px;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;user-select:none;}
+.chip.active.xk{background:var(--xk-a);border-color:var(--xk);color:var(--xk2);}
+.chip.active.nk{background:var(--nk-a);border-color:var(--nk);color:var(--nk2);}
+
+/* SUMMARY CARDS */
+.cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+.scard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;}
+.scard::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.scard.c1::after{background:linear-gradient(90deg,var(--xk),transparent);}
+.scard.c2::after{background:linear-gradient(90deg,var(--c2),transparent);}
+.scard.c3::after{background:linear-gradient(90deg,var(--c3),transparent);}
+.scard.c4::after{background:linear-gradient(90deg,var(--yellow),transparent);}
+.scard.n1::after{background:linear-gradient(90deg,var(--nk),transparent);}
+.scard.n2::after{background:linear-gradient(90deg,#ef4444,transparent);}
+.scard.n3::after{background:linear-gradient(90deg,var(--c3),transparent);}
+.scard.n4::after{background:linear-gradient(90deg,var(--yellow),transparent);}
+.sc-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.sc-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--text);line-height:1.1;margin-bottom:2px;}
+.sc-sub{font-size:11px;color:var(--text3);}
+
+/* ANALYSIS */
+.analysis-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.analysis-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+.ap-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.dot-sm{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.xk-dot{background:var(--xk);box-shadow:0 0 5px var(--xk);}
+.nk-dot{background:var(--nk);box-shadow:0 0 5px var(--nk);}
+.b2-dot{background:var(--c2);box-shadow:0 0 5px var(--c2);}
+.b3-dot{background:var(--c3);box-shadow:0 0 5px var(--c3);}
+.analysis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.ag-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.ag-metric{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.ag-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;color:var(--text);margin-bottom:3px;}
+.ag-change{display:flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;}
+.ag-change.up{color:var(--up);}
+.ag-change.down{color:var(--down);}
+.ag-change.neu{color:var(--neu);}
+.ag-period{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* YEAR LEGEND */
+.year-legend{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--panel);border:1px solid var(--border);border-radius:10px;}
+.yl-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-right:4px;}
+.yl-item{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;opacity:1;transition:opacity .2s;}
+.yl-item.hidden{opacity:.25;}
+.yl-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.yl-year{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--text2);}
+
+/* CHARTS */
+.charts-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px;}
+.chart-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+.cp-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.chart-wrap{position:relative;height:210px;}
+
+/* TABLE */
+.table-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+.tp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.sort-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.sb{font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:6px;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text3);transition:all .15s;}
+.sb.active.xk-sort{border-color:var(--xk);color:var(--xk);}
+.sb.active.nk-sort{border-color:var(--nk);color:var(--nk);}
+.t-scroll{max-height:340px;overflow-y:auto;}
+.t-scroll::-webkit-scrollbar{width:3px;}
+.t-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead th{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-weight:700;padding:7px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+thead th:first-child,thead th:nth-child(2){text-align:left;}
+tbody tr{border-bottom:1px solid rgba(22,45,71,.5);transition:background .12s;}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+tbody tr:last-child{border-bottom:none;}
+tbody td{padding:8px 10px;text-align:right;color:var(--text2);}
+tbody td:nth-child(2){text-align:left;color:var(--text);font-weight:500;}
+.rnk{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;border-radius:3px;margin-right:5px;background:var(--bg3);color:var(--text3);}
+.mini-bar{height:3px;border-radius:2px;background:var(--bg3);overflow:hidden;margin-top:2px;}
+.mb-fill{height:100%;border-radius:2px;transition:width .5s;}
+.vc.xk{color:var(--xk2);font-weight:600;}
+.vc.nk{color:var(--nk2);font-weight:600;}
+.vc.c2{color:var(--c2);font-weight:600;}
+.yoy{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:1px 5px;border-radius:3px;}
+.yoy.up{background:rgba(34,197,94,.12);color:var(--up);}
+.yoy.down{background:rgba(239,68,68,.12);color:var(--down);}
+.yoy.neu{background:rgba(251,191,36,.08);color:var(--neu);}
+
+/* Tab panels */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+@media(max-width:1100px){.charts-trio{grid-template-columns:1fr 1fr;}}
+@media(max-width:780px){.cards-row{grid-template-columns:repeat(2,1fr);}.charts-trio{grid-template-columns:1fr;}.analysis-row{grid-template-columns:1fr;}.controls{flex-direction:column;}main{padding:14px;}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">
+    <div class="logo-icon">VN</div>
+    <div class="logo-text">XNK <span>Analytics</span></div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-dot"></div>
+    Cập nhật: 04/2026 &nbsp;|&nbsp; Nguồn: Tổng cục Hải quan Việt Nam
+  </div>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab-btn xk active" onclick="switchTab('xk')">📦 Xuất Khẩu</button>
+  <button class="tab-btn nk" onclick="switchTab('nk')">🚢 Nhập Khẩu</button>
+</div>
+
+<main>
+  <!-- XK -->
+  <div class="tab-panel active" id="panel-xk">
+    <div class="controls">
+      <div class="ctrl-group" style="min-width:240px;">
+        <div class="ctrl-label">Khoảng thời gian</div>
+        <div class="time-disp"><span class="t-badge" id="xk-t1">01/2020</span><span class="t-sep">→</span><span class="t-badge" id="xk-t2">03/2026</span></div>
+        <div id="slider-xk"></div>
+      </div>
+      <div class="ctrl-group filter-wrap">
+        <div class="ctrl-label">Lọc mặt hàng</div>
+        <div class="search-box">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Tìm mặt hàng..." id="xk-search" oninput="filterChips('xk')">
+        </div>
+        <div class="chip-acts">
+          <button class="chip-act" onclick="selectAll('xk')">Chọn tất cả</button>
+          <button class="chip-act" onclick="clearAll('xk')">Bỏ chọn</button>
+        </div>
+        <div class="chips" id="xk-chips"></div>
+      </div>
+    </div>
+
+    <div class="cards-row">
+      <div class="scard c1"><div class="sc-label">Tổng Giá Trị XK</div><div class="sc-val" id="xk-s1">—</div><div class="sc-sub">USD</div></div>
+      <div class="scard c2"><div class="sc-label">Tổng Sản Lượng XK</div><div class="sc-val" id="xk-s2">—</div><div class="sc-sub">Tấn</div></div>
+      <div class="scard c3"><div class="sc-label">TB Đơn Giá XK</div><div class="sc-val" id="xk-s3">—</div><div class="sc-sub">USD / Tấn</div></div>
+      <div class="scard c4"><div class="sc-label">TB Giá Trị / Tháng</div><div class="sc-val" id="xk-s4">—</div><div class="sc-sub">USD / tháng</div></div>
+    </div>
+
+    <div class="analysis-row">
+      <div class="analysis-panel">
+        <div class="ap-title"><span class="dot-sm xk-dot"></span>SO SÁNH CÙNG KỲ NĂM TRƯỚC (YoY)</div>
+        <div class="analysis-grid" id="xk-yoy-grid"></div>
+      </div>
+      <div class="analysis-panel">
+        <div class="ap-title"><span class="dot-sm b2-dot"></span>SO SÁNH VỚI TRUNG BÌNH 3 THÁNG GẦN NHẤT</div>
+        <div class="analysis-grid" id="xk-m3-grid"></div>
+      </div>
+    </div>
+
+    <!-- Year Legend -->
+    <div class="year-legend" id="xk-year-legend"></div>
+
+    <div class="charts-trio">
+      <div class="chart-panel">
+        <div class="cp-title"><span class="dot-sm xk-dot"></span>SẢN LƯỢNG XUẤT KHẨU (Tấn)</div>
+        <div class="chart-wrap"><canvas id="xk-vol-chart"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <div class="cp-title"><span class="dot-sm b2-dot"></span>GIÁ TRỊ XUẤT KHẨU (Triệu USD)</div>
+        <div class="chart-wrap"><canvas id="xk-val-chart"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <div class="cp-title"><span class="dot-sm b3-dot"></span>GIÁ TRỊ TRUNG BÌNH – USD/Tấn (Theo Năm)</div>
+        <div class="chart-wrap"><canvas id="xk-avg-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <div class="tp-header">
+        <div class="cp-title" style="margin:0"><span class="dot-sm xk-dot"></span>BẢNG THỐNG KÊ THEO MẶT HÀNG</div>
+        <div class="sort-btns">
+          <button class="sb active xk-sort" onclick="sortTable('xk','gt',this)">Giá Trị ↓</button>
+          <button class="sb" onclick="sortTable('xk','sl',this)">Sản Lượng ↓</button>
+          <button class="sb" onclick="sortTable('xk','avg',this)">Đơn Giá ↓</button>
+          <button class="sb" onclick="sortTable('xk','yoy',this)">YoY ↓</button>
+          <button class="sb" onclick="sortTable('xk','name',this)">Tên A-Z</button>
+        </div>
+      </div>
+      <div class="t-scroll">
+        <table><thead><tr>
+          <th style="width:26px">#</th><th>Mặt Hàng</th>
+          <th>TB GT/Tháng (USD)</th><th>TB SL/Tháng (Tấn)</th>
+          <th>TB Đơn Giá (USD/T)</th><th>YoY GT%</th><th>vs 3T Gần Nhất</th><th>Tỷ Trọng</th>
+        </tr></thead><tbody id="xk-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- NK -->
+  <div class="tab-panel" id="panel-nk">
+    <div class="controls">
+      <div class="ctrl-group" style="min-width:240px;">
+        <div class="ctrl-label">Khoảng thời gian</div>
+        <div class="time-disp"><span class="t-badge" id="nk-t1">01/2020</span><span class="t-sep">→</span><span class="t-badge" id="nk-t2">03/2026</span></div>
+        <div id="slider-nk" class="nk-slider"></div>
+      </div>
+      <div class="ctrl-group filter-wrap">
+        <div class="ctrl-label">Lọc mặt hàng</div>
+        <div class="search-box">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Tìm mặt hàng..." id="nk-search" oninput="filterChips('nk')">
+        </div>
+        <div class="chip-acts">
+          <button class="chip-act" onclick="selectAll('nk')">Chọn tất cả</button>
+          <button class="chip-act" onclick="clearAll('nk')">Bỏ chọn</button>
+        </div>
+        <div class="chips" id="nk-chips"></div>
+      </div>
+    </div>
+
+    <div class="cards-row">
+      <div class="scard n1"><div class="sc-label">Tổng Giá Trị NK</div><div class="sc-val" id="nk-s1">—</div><div class="sc-sub">USD</div></div>
+      <div class="scard n2"><div class="sc-label">Tổng Sản Lượng NK</div><div class="sc-val" id="nk-s2">—</div><div class="sc-sub">Tấn</div></div>
+      <div class="scard n3"><div class="sc-label">TB Đơn Giá NK</div><div class="sc-val" id="nk-s3">—</div><div class="sc-sub">USD / Tấn</div></div>
+      <div class="scard n4"><div class="sc-label">TB Giá Trị / Tháng</div><div class="sc-val" id="nk-s4">—</div><div class="sc-sub">USD / tháng</div></div>
+    </div>
+
+    <div class="analysis-row">
+      <div class="analysis-panel">
+        <div class="ap-title"><span class="dot-sm nk-dot"></span>SO SÁNH CÙNG KỲ NĂM TRƯỚC (YoY)</div>
+        <div class="analysis-grid" id="nk-yoy-grid"></div>
+      </div>
+      <div class="analysis-panel">
+        <div class="ap-title"><span class="dot-sm b2-dot"></span>SO SÁNH VỚI TRUNG BÌNH 3 THÁNG GẦN NHẤT</div>
+        <div class="analysis-grid" id="nk-m3-grid"></div>
+      </div>
+    </div>
+
+    <div class="year-legend" id="nk-year-legend"></div>
+
+    <div class="charts-trio">
+      <div class="chart-panel">
+        <div class="cp-title"><span class="dot-sm nk-dot"></span>SẢN LƯỢNG NHẬP KHẨU (Tấn)</div>
+        <div class="chart-wrap"><canvas id="nk-vol-chart"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <div class="cp-title"><span class="dot-sm b2-dot"></span>GIÁ TRỊ NHẬP KHẨU (Triệu USD)</div>
+        <div class="chart-wrap"><canvas id="nk-val-chart"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <div class="cp-title"><span class="dot-sm b3-dot"></span>GIÁ TRỊ TRUNG BÌNH – USD/Tấn (Theo Năm)</div>
+        <div class="chart-wrap"><canvas id="nk-avg-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <div class="tp-header">
+        <div class="cp-title" style="margin:0"><span class="dot-sm nk-dot"></span>BẢNG THỐNG KÊ THEO MẶT HÀNG</div>
+        <div class="sort-btns">
+          <button class="sb active nk-sort" onclick="sortTable('nk','gt',this)">Giá Trị ↓</button>
+          <button class="sb" onclick="sortTable('nk','sl',this)">Sản Lượng ↓</button>
+          <button class="sb" onclick="sortTable('nk','avg',this)">Đơn Giá ↓</button>
+          <button class="sb" onclick="sortTable('nk','yoy',this)">YoY ↓</button>
+          <button class="sb" onclick="sortTable('nk','name',this)">Tên A-Z</button>
+        </div>
+      </div>
+      <div class="t-scroll">
+        <table><thead><tr>
+          <th style="width:26px">#</th><th>Mặt Hàng</th>
+          <th>TB GT/Tháng (USD)</th><th>TB SL/Tháng (Tấn)</th>
+          <th>TB Đơn Giá (USD/T)</th><th>YoY GT%</th><th>vs 3T Gần Nhất</th><th>Tỷ Trọng</th>
+        </tr></thead><tbody id="nk-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script src="data.js"></script>
+<script>
+
+// ── Year color palette ──────────────────────────────────────
+const YEAR_COLORS = {
+  '2020': { solid:'#60a5fa', bar:'rgba(96,165,250,0.72)',  line:'#60a5fa' },
+  '2021': { solid:'#34d399', bar:'rgba(52,211,153,0.72)',  line:'#34d399' },
+  '2022': { solid:'#fbbf24', bar:'rgba(251,191,36,0.72)',  line:'#fbbf24' },
+  '2023': { solid:'#f87171', bar:'rgba(248,113,113,0.72)', line:'#f87171' },
+  '2024': { solid:'#a78bfa', bar:'rgba(167,139,250,0.72)', line:'#a78bfa' },
+  '2025': { solid:'#38bdf8', bar:'rgba(56,189,248,0.72)',  line:'#38bdf8' },
+  '2026': { solid:'#fb923c', bar:'rgba(251,146,60,0.72)',  line:'#fb923c' },
+};
+const ALL_YEARS = ['2020','2021','2022','2023','2024','2025','2026'];
+const MONTHS_VI = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+// ── State ────────────────────────────────────────────────────
+const state = {
+  xk:{ sort:'gt', selected:new Set(), range:[0,74], hiddenYears:new Set() },
+  nk:{ sort:'gt', selected:new Set(), range:[0,74], hiddenYears:new Set() }
+};
+const charts = {};
+
+// ── Dates ────────────────────────────────────────────────────
+function getAllDates(type){
+  const k=type==='xk'?'xuat_khau':'nhap_khau';
+  return [...new Set(RAW[k].map(d=>d.ky))].sort();
+}
+const DATES={xk:getAllDates('xk'),nk:getAllDates('nk')};
+
+// ── Formatters ───────────────────────────────────────────────
+function fmtDate(ky){const[y,m]=ky.split('-');return`${m}/${y}`;}
+function fmtBig(n,d=2){if(!n||isNaN(n))return'—';if(n>=1e9)return(n/1e9).toFixed(d)+' Tỷ';if(n>=1e6)return(n/1e6).toFixed(d)+' Tr';if(n>=1e3)return(n/1e3).toFixed(1)+' K';return n.toFixed(0);}
+function fmtN(n){if(!n||isNaN(n))return'—';return new Intl.NumberFormat('vi-VN').format(Math.round(n));}
+function pctStr(v){if(isNaN(v)||!isFinite(v))return null;return(v>=0?'+':'')+v.toFixed(1)+'%';}
+function pctCls(v){if(isNaN(v)||!isFinite(v))return'neu';return v>0.5?'up':v<-0.5?'down':'neu';}
+function arrow(v){if(isNaN(v)||!isFinite(v))return'–';return v>0.5?'▲':v<-0.5?'▼':'–';}
+
+// ── Init ─────────────────────────────────────────────────────
+function init(){
+  ['xk','nk'].forEach(t=>{initItems(t);initSlider(t);renderYearLegend(t);updateAll(t);});
+}
+
+function initItems(t){
+  const k=t==='xk'?'xuat_khau':'nhap_khau';
+  state[t].selected=new Set([...new Set(RAW[k].map(d=>d.name))].sort());
+  renderChips(t);
+}
+
+function renderChips(t){
+  const k=t==='xk'?'xuat_khau':'nhap_khau';
+  const items=[...new Set(RAW[k].map(d=>d.name))].sort();
+  const q=document.getElementById(`${t}-search`).value.toLowerCase();
+  const c=document.getElementById(`${t}-chips`);c.innerHTML='';
+  items.forEach(item=>{
+    if(q&&!item.toLowerCase().includes(q))return;
+    const el=document.createElement('div');
+    el.className=`chip ${state[t].selected.has(item)?'active '+t:''}`;
+    el.textContent=item;
+    el.onclick=()=>{
+      if(state[t].selected.has(item))state[t].selected.delete(item);
+      else state[t].selected.add(item);
+      el.className=`chip ${state[t].selected.has(item)?'active '+t:''}`;
+      updateAll(t);
+    };
+    c.appendChild(el);
+  });
+}
+
+function filterChips(t){renderChips(t);}
+function selectAll(t){initItems(t);updateAll(t);}
+function clearAll(t){state[t].selected=new Set();renderChips(t);updateAll(t);}
+
+function initSlider(t){
+  const dates=DATES[t];
+  const el=document.getElementById(`slider-${t}`);
+  noUiSlider.create(el,{start:[0,dates.length-1],connect:true,step:1,range:{min:0,max:dates.length-1}});
+  el.noUiSlider.on('update',vals=>{
+    const[i1,i2]=vals.map(v=>Math.round(v));
+    state[t].range=[i1,i2];
+    document.getElementById(`${t}-t1`).textContent=fmtDate(dates[i1]);
+    document.getElementById(`${t}-t2`).textContent=fmtDate(dates[i2]);
+    updateAll(t);
+  });
+}
+
+// ── Year Legend ──────────────────────────────────────────────
+function renderYearLegend(t){
+  const el=document.getElementById(`${t}-year-legend`);
+  // Only show years in current range
+  const dates=DATES[t];
+  const[i1,i2]=state[t].range;
+  const activeYears=new Set(dates.slice(i1,i2+1).map(d=>d.slice(0,4)));
+  const years=ALL_YEARS.filter(y=>activeYears.has(y));
+
+  el.innerHTML=`<span class="yl-label">Năm:</span>`;
+  years.forEach(y=>{
+    const c=YEAR_COLORS[y];
+    const hidden=state[t].hiddenYears.has(y);
+    const item=document.createElement('div');
+    item.className=`yl-item${hidden?' hidden':''}`;
+    item.innerHTML=`<div class="yl-swatch" style="background:${c.solid}"></div><span class="yl-year">${y}</span>`;
+    item.onclick=()=>{
+      if(state[t].hiddenYears.has(y))state[t].hiddenYears.delete(y);
+      else state[t].hiddenYears.add(y);
+      item.classList.toggle('hidden');
+      updateCharts(t,getFiltered(t));
+    };
+    el.appendChild(item);
+  });
+}
+
+// ── Data ─────────────────────────────────────────────────────
+function getFiltered(t){
+  const k=t==='xk'?'xuat_khau':'nhap_khau';
+  const dates=DATES[t];
+  const[i1,i2]=state[t].range;
+  const dateSet=new Set(dates.slice(i1,i2+1));
+  return RAW[k].filter(d=>dateSet.has(d.ky)&&state[t].selected.has(d.name));
+}
+
+function byMonth(filtered){
+  const m={};
+  filtered.forEach(d=>{
+    if(!m[d.ky])m[d.ky]={gt:0,sl:0};
+    m[d.ky].gt+=d.gia_tri;m[d.ky].sl+=d.luong;
+  });
+  return Object.entries(m).sort((a,b)=>a[0].localeCompare(b[0]));
+}
+
+function sumForMonth(t,ky){
+  const k=t==='xk'?'xuat_khau':'nhap_khau';
+  let gt=0,sl=0;
+  RAW[k].forEach(d=>{if(d.ky===ky&&state[t].selected.has(d.name)){gt+=d.gia_tri;sl+=d.luong;}});
+  return{gt,sl};
+}
+
+// ── Analysis ─────────────────────────────────────────────────
+function computeAnalysis(t){
+  const dates=DATES[t];const[,i2]=state[t].range;
+  const latestKy=dates[i2];const[y,m]=latestKy.split('-').map(Number);
+  const cur=sumForMonth(t,latestKy);
+  const yoyKy=`${y-1}-${String(m).padStart(2,'0')}`;
+  const yoyVal=sumForMonth(t,yoyKy);
+  const prev=[i2>0?dates[i2-1]:null,i2>1?dates[i2-2]:null,i2>2?dates[i2-3]:null].filter(Boolean);
+  let m3gt=0,m3sl=0,m3n=0;
+  prev.forEach(ky=>{const v=sumForMonth(t,ky);m3gt+=v.gt;m3sl+=v.sl;m3n++;});
+  const m3=m3n>0?{gt:m3gt/m3n,sl:m3sl/m3n}:null;
+  const pct=(a,b)=>b&&b!==0?(a-b)/b*100:NaN;
+  return{cur,yoy:{ky:yoyKy,val:yoyVal,gt_pct:pct(cur.gt,yoyVal.gt),sl_pct:pct(cur.sl,yoyVal.sl),avg_pct:pct(cur.sl>0?cur.gt/cur.sl:NaN,yoyVal.sl>0?yoyVal.gt/yoyVal.sl:NaN)},m3:{avg:m3,gt_pct:m3?pct(cur.gt,m3.gt):NaN,sl_pct:m3?pct(cur.sl,m3.sl):NaN,avg_pct:m3?pct(cur.sl>0?cur.gt/cur.sl:NaN,m3.sl>0?m3.gt/m3.sl:NaN):NaN},latestKy};
+}
+
+function renderAnalysisGrid(elId,data){
+  const el=document.getElementById(elId);
+  const rows=[
+    {label:'Giá Trị',cur:fmtBig(data.cur.gt),pct:data.pct_gt,ref:data.ref},
+    {label:'Sản Lượng',cur:fmtBig(data.cur.sl),pct:data.pct_sl,ref:data.ref},
+    {label:'Đơn Giá',cur:data.cur.sl>0?fmtBig(data.cur.gt/data.cur.sl):'—',pct:data.pct_avg,ref:data.ref}
+  ];
+  el.innerHTML=rows.map(r=>`<div class="ag-item"><div class="ag-metric">${r.label}</div><div class="ag-val">${r.cur}</div><div class="ag-change ${pctCls(r.pct)}">${arrow(r.pct)} ${pctStr(r.pct)||'—'}</div><div class="ag-period">${r.ref}</div></div>`).join('');
+}
+
+// ── Update All ───────────────────────────────────────────────
+function updateAll(t){
+  const f=getFiltered(t);
+  // Cards
+  const totalGT=f.reduce((s,d)=>s+d.gia_tri,0);
+  const totalSL=f.reduce((s,d)=>s+d.luong,0);
+  const months=new Set(f.map(d=>d.ky)).size;
+  document.getElementById(`${t}-s1`).textContent=fmtBig(totalGT);
+  document.getElementById(`${t}-s2`).textContent=fmtBig(totalSL);
+  document.getElementById(`${t}-s3`).textContent=totalSL>0?fmtBig(totalGT/totalSL):'—';
+  document.getElementById(`${t}-s4`).textContent=months>0?fmtBig(totalGT/months):'—';
+  // Analysis
+  const a=computeAnalysis(t);
+  const lbl=fmtDate(a.latestKy);
+  renderAnalysisGrid(`${t}-yoy-grid`,{cur:a.cur,pct_gt:a.yoy.gt_pct,pct_sl:a.yoy.sl_pct,pct_avg:a.yoy.avg_pct,ref:`${lbl} vs ${fmtDate(a.yoy.ky)}`});
+  renderAnalysisGrid(`${t}-m3-grid`,{cur:a.cur,pct_gt:a.m3.gt_pct,pct_sl:a.m3.sl_pct,pct_avg:a.m3.avg_pct,ref:`${lbl} vs TB 3T trước`});
+  // Legend & charts
+  renderYearLegend(t);
+  updateCharts(t,f);
+  updateTable(t,f);
+}
+
+// ── Charts ───────────────────────────────────────────────────
+
+// ── Watermark Plugin (CCIn logo) ──────────────────────────
+const LOGO_URI = 'data:image/jpeg;base64,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hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgv/xAC1EQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/APqmiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiikZgqlmICgZJPQUALRXg/xK/aH0zRJ5rDwlbx6teISrXTsRbofbHMn4ED0J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QeELfVrGCW+1kut5NbkxR2R84wxgo24klwVPzDpn2rtPD3hC4s/EDa7r2szazqq25tYHaBII4IiQzBUX+IkDLE9scVg3Xwi0uaLxQqX91E+tzRzo6gZsykpmxH7F2Y/jSTp7MLS6Gh8Mtb8SeJvCNzqupyaUslw0q6e0EEioVVmQO4LkkEgHAI4+tcoPHvi4aDPbsdEHimPxCujC3+zS+WykZDY8zOCv7zdnG0EYzzXrGg6Xb6JolhpdmCLezgSCPPUhVAyffiuek8B6e/xGTxd50ouVhCm248tpQpQSn/aCMV+lSpRu7objKyOd+JPjjXPCGo6MkTaVcwi2+16pGYnEgiR0WR4jvwM7ztUgn5T1xWn8Rdf8Q6Ze+Gl8NT6R9m1a7Wy3XcDykMys4cFXX5cL096S++G8eqaxr2oazqf9oy6jbNawC5sYH+wrlinl5X+HeevXqcmqcvw01KTS9Asv+EyvwuiSLLaObOBirKuxM5XnapI5znPNUnDQT5tTU8ca5r2k+J/Ctnpb6b9h1S7+yzi4hdpBhWclSHAHyqRyDyc1zd94w8XxWnxAuYpND8vw7IwgVrWUmRQgl+Y+ZydhxxjnnpxXQ3PgGafRLGF/EN++s2V++ow6nKiuwlbdkeWfl2bWI2jA9MVGfh47+FNd0qTXbpr7XJmlv7/yI90gZQhRUxhV2gDjketCcEv67jakyL4W+Jte8TM11e3GjX+kNAP9I0+GSEw3HykwsruSflYHcOOK9DrkPCnhHUNG1GC51HxNf6rFbWptLe3kijhjjUleSIwNxwgALZxk119Zzs3oVG9tQoooqCgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA/9k=';
+const _logoImg = new Image();
+_logoImg.src = LOGO_URI;
+
+const watermarkPlugin = {
+  id: 'ccin_watermark',
+  afterDraw(chart) {
+    const { ctx, chartArea } = chart;
+    if (!chartArea || !_logoImg.complete || !_logoImg.naturalWidth) return;
+
+    const W = chartArea.right  - chartArea.left;
+    const H = chartArea.bottom - chartArea.top;
+
+    // Kích thước logo: chiều rộng = 22% chart area, giữ tỉ lệ
+    const logoW = W * 0.22;
+    const ratio = _logoImg.naturalHeight / _logoImg.naturalWidth;
+    const logoH = logoW * ratio;
+
+    // Vị trí: chính giữa chartArea
+    const x = chartArea.left + (W - logoW) / 2;
+    const y = chartArea.top  + (H - logoH) / 2;
+
+    ctx.save();
+    ctx.globalAlpha = 0.30;   // Độ mờ watermark
+    ctx.drawImage(_logoImg, x, y, logoW, logoH);
+    ctx.restore();
+  }
+};
+
+// Đăng ký plugin toàn cục → áp dụng lên tất cả chart
+Chart.register(watermarkPlugin);
+
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function makeTooltip(color,fmt){
+  return{backgroundColor:'#0b1929',borderColor:'#162d47',borderWidth:1,titleColor:'#6a98bb',bodyColor:color,callbacks:{label:ctx=>fmt(ctx.parsed.y)}};
+}
+
+const SCALE_OPTS={
+  x:{grid:{color:'rgba(22,45,71,.6)'},ticks:{color:'#3a6585',font:{family:'Barlow',size:10}}},
+  y:{grid:{color:'rgba(22,45,71,.6)'},ticks:{color:'#3a6585',font:{family:'Barlow',size:10}}}
+};
+
+function updateCharts(t,filtered){
+  const dates=DATES[t];
+  const[i1,i2]=state[t].range;
+  const rangedDates=dates.slice(i1,i2+1);
+
+  // Build per-year lookup: year → {monthNum → {gt, sl}}
+  const bm=byMonth(filtered);
+  const byYearMonth={}; // year → {mm → {gt,sl}}
+  bm.forEach(([ky,v])=>{
+    const[yr,mm]=ky.split('-');
+    if(!byYearMonth[yr])byYearMonth[yr]={};
+    byYearMonth[yr][mm]=v;
+  });
+
+  // Active years in range (not hidden)
+  const activeYears=[...new Set(rangedDates.map(d=>d.slice(0,4)))].filter(y=>!state[t].hiddenYears.has(y));
+
+  // ── Bar charts: one dataset per year, x = all ranged months ──
+  // X labels = shortened dates
+  const barLabels=rangedDates.map(ky=>{const[y,m]=ky.split('-');return`T${parseInt(m)}/${y.slice(2)}`});
+  const maxBars=rangedDates.length;
+  const barRadius=maxBars>36?0:2;
+
+  // Vol datasets
+  const volDatasets=activeYears.map(yr=>({
+    label:yr,
+    data:rangedDates.map(ky=>{const[y,m]=ky.split('-');return yr===y?(byYearMonth[y]?.[m]?.sl||0):null;}),
+    backgroundColor:YEAR_COLORS[yr]?.bar||'rgba(128,128,128,.5)',
+    borderColor:YEAR_COLORS[yr]?.solid||'#888',
+    borderWidth:1,
+    borderRadius:barRadius,
+    borderSkipped:false,
+    skipNull:true
+  }));
+
+  // Val datasets
+  const valDatasets=activeYears.map(yr=>({
+    label:yr,
+    data:rangedDates.map(ky=>{const[y,m]=ky.split('-');return yr===y?(byYearMonth[y]?.[m]?.gt/1e6||0):null;}),
+    backgroundColor:YEAR_COLORS[yr]?.bar||'rgba(128,128,128,.5)',
+    borderColor:YEAR_COLORS[yr]?.solid||'#888',
+    borderWidth:1,
+    borderRadius:barRadius,
+    borderSkipped:false,
+    skipNull:true
+  }));
+
+  const barOpts=(fmt,unit)=>({
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:makeTooltip('#fff',v=>v!==null?` ${fmt(v)} ${unit}`:'—')},
+    scales:{
+      x:{...SCALE_OPTS.x,ticks:{...SCALE_OPTS.x.ticks,maxTicksLimit:10}},
+      y:{...SCALE_OPTS.y,ticks:{...SCALE_OPTS.y.ticks,callback:v=>fmtBig(v*(unit.includes('Tr')||unit.includes('USD/T')?1:1))}}
+    }
+  });
+
+  destroyChart(`${t}-vol`);
+  charts[`${t}-vol`]=new Chart(document.getElementById(`${t}-vol-chart`).getContext('2d'),{
+    type:'bar',
+    data:{labels:barLabels,datasets:volDatasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:makeTooltip('#fff',v=>v!==null?` ${fmtBig(v)} Tấn`:'—')},
+      scales:{x:{...SCALE_OPTS.x,ticks:{...SCALE_OPTS.x.ticks,maxTicksLimit:10}},y:{...SCALE_OPTS.y,ticks:{...SCALE_OPTS.y.ticks,callback:v=>fmtBig(v)}}}
+    }
+  });
+
+  destroyChart(`${t}-val`);
+  charts[`${t}-val`]=new Chart(document.getElementById(`${t}-val-chart`).getContext('2d'),{
+    type:'bar',
+    data:{labels:barLabels,datasets:valDatasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:makeTooltip('#fff',v=>v!==null?` ${v.toFixed(1)} Tr USD`:'—')},
+      scales:{x:{...SCALE_OPTS.x,ticks:{...SCALE_OPTS.x.ticks,maxTicksLimit:10}},y:{...SCALE_OPTS.y,ticks:{...SCALE_OPTS.y.ticks,callback:v=>fmtBig(v*1e6)}}}
+    }
+  });
+
+  // ── Line chart: one line per year, X = month 1-12 ──────────
+  // Get months range within each year
+  const monthLabels=MONTHS_VI;
+  const avgLineDatasets=activeYears.map(yr=>{
+    const data=Array(12).fill(null);
+    if(byYearMonth[yr]){
+      Object.entries(byYearMonth[yr]).forEach(([mm,v])=>{
+        const mIdx=parseInt(mm)-1;
+        if(v.sl>0)data[mIdx]=v.gt/v.sl;
+      });
+    }
+    return{
+      label:yr,
+      data,
+      borderColor:YEAR_COLORS[yr]?.solid||'#888',
+      backgroundColor:'transparent',
+      borderWidth:2,
+      pointRadius:3,
+      pointHoverRadius:5,
+      pointBackgroundColor:YEAR_COLORS[yr]?.solid||'#888',
+      tension:0.35,
+      spanGaps:false
+    };
+  });
+
+  destroyChart(`${t}-avg`);
+  charts[`${t}-avg`]=new Chart(document.getElementById(`${t}-avg-chart`).getContext('2d'),{
+    type:'line',
+    data:{labels:monthLabels,datasets:avgLineDatasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:true,
+          position:'top',
+          align:'end',
+          labels:{color:'#6a98bb',font:{family:'Barlow Condensed',size:11},boxWidth:10,boxHeight:10,padding:8,usePointStyle:true,pointStyle:'rectRounded'}
+        },
+        tooltip:{backgroundColor:'#0b1929',borderColor:'#162d47',borderWidth:1,titleColor:'#6a98bb',bodyColor:'#deeeff',callbacks:{label:ctx=>ctx.parsed.y?` ${ctx.dataset.label}: ${fmtBig(ctx.parsed.y)} USD/T`:'—'}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(22,45,71,.6)'},ticks:{color:'#3a6585',font:{family:'Barlow',size:10}}},
+        y:{grid:{color:'rgba(22,45,71,.6)'},ticks:{color:'#3a6585',font:{family:'Barlow',size:10},callback:v=>fmtBig(v)}}
+      }
+    }
+  });
+}
+
+// ── Table ─────────────────────────────────────────────────────
+function sortTable(t,field,btn){
+  state[t].sort=field;
+  const cls=t==='xk'?'xk-sort':'nk-sort';
+  document.querySelectorAll(`#panel-${t} .sort-btns .sb`).forEach(b=>{b.classList.remove('active',cls);});
+  btn.classList.add('active',cls);
+  updateTable(t,getFiltered(t));
+}
+
+function itemYoY(t,name){
+  const k=t==='xk'?'xuat_khau':'nhap_khau';
+  const dates=DATES[t];const[,i2]=state[t].range;
+  const lKy=dates[i2];const[y,m]=lKy.split('-').map(Number);
+  const yKy=`${y-1}-${String(m).padStart(2,'0')}`;
+  const cur=RAW[k].find(d=>d.ky===lKy&&d.name===name);
+  const ref=RAW[k].find(d=>d.ky===yKy&&d.name===name);
+  if(!cur||!ref||ref.gia_tri===0)return NaN;
+  return(cur.gia_tri-ref.gia_tri)/ref.gia_tri*100;
+}
+
+function itemM3(t,name){
+  const k=t==='xk'?'xuat_khau':'nhap_khau';
+  const dates=DATES[t];const[,i2]=state[t].range;
+  const lKy=dates[i2];
+  const prevKys=[i2>0?dates[i2-1]:null,i2>1?dates[i2-2]:null,i2>2?dates[i2-3]:null].filter(Boolean);
+  const cur=RAW[k].find(d=>d.ky===lKy&&d.name===name);
+  if(!cur)return NaN;
+  let s=0,n=0;
+  prevKys.forEach(ky=>{const r=RAW[k].find(d=>d.ky===ky&&d.name===name);if(r){s+=r.gia_tri;n++;}});
+  if(!n||s/n===0)return NaN;
+  return(cur.gia_tri-s/n)/(s/n)*100;
+}
+
+function updateTable(t,filtered){
+  const map={};
+  filtered.forEach(d=>{
+    if(!map[d.name])map[d.name]={gt:0,sl:0,cnt:0};
+    map[d.name].gt+=d.gia_tri;map[d.name].sl+=d.luong;map[d.name].cnt++;
+  });
+  let rows=Object.entries(map).map(([name,v])=>({
+    name,
+    avg_gt:v.gt/v.cnt,avg_sl:v.sl/v.cnt,
+    avg_don:v.sl>0?v.gt/v.sl:0,
+    total_gt:v.gt,
+    yoy:itemYoY(t,name),m3:itemM3(t,name)
+  }));
+  const sf=state[t].sort;
+  rows.sort((a,b)=>{
+    if(sf==='name')return a.name.localeCompare(b.name,'vi');
+    if(sf==='sl')return b.avg_sl-a.avg_sl;
+    if(sf==='avg')return b.avg_don-a.avg_don;
+    if(sf==='yoy')return(isNaN(b.yoy)?-Infinity:b.yoy)-(isNaN(a.yoy)?-Infinity:a.yoy);
+    return b.avg_gt-a.avg_gt;
+  });
+  const totalGT=rows.reduce((s,r)=>s+r.avg_gt,0);
+  const maxGT=rows.reduce((m,r)=>Math.max(m,r.avg_gt),0);
+  const ac=t==='xk'?'xk':'nk';
+  const tbody=document.getElementById(`${t}-tbody`);tbody.innerHTML='';
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:28px;">Không có dữ liệu</td></tr>`;return;}
+  rows.forEach((r,i)=>{
+    const pct=totalGT>0?r.avg_gt/totalGT*100:0;
+    const bw=maxGT>0?r.avg_gt/maxGT*100:0;
+    const yC=pctCls(r.yoy);const yS=pctStr(r.yoy);
+    const mC=pctCls(r.m3);const mS=pctStr(r.m3);
+    const barColor=t==='xk'?'var(--xk)':'var(--nk)';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="rnk">${i+1}</span></td>
+      <td>${r.name}</td>
+      <td class="vc ${ac}">${fmtN(r.avg_gt)}</td>
+      <td>${r.avg_sl>0?fmtN(r.avg_sl):'—'}</td>
+      <td class="vc c2">${r.avg_don>0?fmtN(r.avg_don):'—'}</td>
+      <td><span class="yoy ${yC}">${yS?arrow(r.yoy)+' '+yS:'—'}</span></td>
+      <td><span class="yoy ${mC}">${mS?arrow(r.m3)+' '+mS:'—'}</span></td>
+      <td><div style="display:flex;align-items:center;gap:5px;"><div style="flex:1;"><div class="mini-bar"><div class="mb-fill" style="width:${bw}%;background:${barColor}"></div></div></div><span style="font-size:10px;color:var(--text3);min-width:32px;text-align:right">${pct.toFixed(1)}%</span></div></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Tab switch ───────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`panel-${t}`).classList.add('active');
+  document.querySelector(`.tab-btn.${t}`).classList.add('active');
+}
+
+init();
+</script>
+</body>
+</html>
